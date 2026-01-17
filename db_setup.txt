@@ -1,0 +1,45 @@
+# this page is basically have sql code for the generation of the table 
+
+create table author(
+    author_id int primary key auto_increment,
+    name varchar(100) not null,
+    country varchar(50),
+    birth_year int
+    );
+
+
+
+
+ create table book(
+    book_id int primary key auto_increment,
+    title varchar(150) not null,
+    genre varchar(50),
+    published_year int check(published_year>1700),
+    price decimal(6,2) check(price>=0),
+    author_id int,
+    foreign key (author_id) references author(author_id)
+    );
+
+
+
+
+ create table member(
+    member_id int primary key auto_increment,
+    name varchar(100) not null,
+    email varchar(100) unique,
+    join_date date
+    );
+
+
+
+
+create table borrow(
+    borrow_id int primary key auto_increment,
+    book_id int,
+    member_id int,
+    borrow_date date,
+    return_date date,
+    foreign key (book_id) references book(book_id),
+    foreign key (member_id) references member(member_id)
+    );
+    
