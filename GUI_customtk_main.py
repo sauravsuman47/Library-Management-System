@@ -2,7 +2,7 @@ import customtkinter
 from PIL import Image
 from tkinter import messagebox
 from author import add_author, view_authors
-from book import add_book, view_books
+from book import add_book, view_books, add_book_copies
 from member import add_member, view_members
 from borrow import borrow_book, return_book, view_borrowed_books, check_book_availability
 
@@ -528,4 +528,5 @@ class LibraryGUI:
 
 
 LibraryGUI()
+
 
