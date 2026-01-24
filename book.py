@@ -65,9 +65,20 @@ def view_books():
     return books
 
 
+def add_book_copies(book_id,no_of_copies):
+    conn = get_connection()
+    cursor = conn.cursor()
+    query ='''
+Update book set available_copies = available_copies + %s where book_id = %s
+'''
+    cursor.execute(query,(no_of_copies,book_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
 
 
 
 
     
+
 
