@@ -2,7 +2,7 @@ import customtkinter
 from PIL import Image
 from tkinter import messagebox
 from author import add_author, view_authors
-from book import add_book, view_books
+from book import add_book, view_books, add_book_copies
 from member import add_member, view_members
 from borrow import borrow_book, return_book, view_borrowed_books, check_book_availability
 
@@ -32,11 +32,12 @@ class LibraryGUI:
         title = customtkinter.CTkLabel(self.main_frame, text="Library Management System", font=("Montserrat", 26, "bold"))
         title.grid(row=0, column=0, columnspan=2, pady=(20, 40))
 
-        # Menu buttons in grid layout
+        # Menu buttons
         menu_items = [
             ("Add Author", self.add_author),
             ("View Authors", self.view_authors),
             ("Add Book", self.add_book),
+            ("Add Book Copies", self.add_book_copies),
             ("View Books", self.view_books),
             ("Add Member", self.add_member),
             ("View Members", self.view_members),
@@ -47,8 +48,8 @@ class LibraryGUI:
             ("Exit", self.window.quit)
         ]
 
-        # Grid placement
-        for index, (label, command) in enumerate(menu_items[:8]):
+        # Grid placement for all except Exit
+        for index, (label, command) in enumerate(menu_items[:-1]):  # skip Exit
             row = index // 2 + 1
             col = index % 2
             button = customtkinter.CTkButton(
@@ -61,17 +62,17 @@ class LibraryGUI:
             )
             button.grid(row=row, column=col, padx=20, pady=10)
 
-        # Centered buttons (last 3)
-        for i, (label, command) in enumerate(menu_items[8:], start=5):
-            button = customtkinter.CTkButton(
-                self.main_frame,
-                text=label,
-                command=command,
-                width=300,
-                height=40,
-                fg_color="red" if label == "Exit" else "black"
-            )
-            button.grid(row=i, column=0, columnspan=2, pady=10)
+        # Center only Exit button
+        exit_label, exit_command = menu_items[-1]
+        exit_button = customtkinter.CTkButton(
+            self.main_frame,
+            text=exit_label,
+            command=exit_command,
+            width=300,
+            height=40,
+            fg_color="red"
+        )
+        exit_button.grid(row=(len(menu_items)//2)+2, column=0, columnspan=2, pady=20)
 
         # Center columns
         self.main_frame.grid_columnconfigure((0, 1), weight=1)
@@ -237,6 +238,57 @@ class LibraryGUI:
                     cell.grid(row=row_index, column=col_index, padx=10, pady=5)
         except Exception as e:
             messagebox.showerror("Database Error", f"Failed to fetch books:\n{e}")
+
+    def create_popup(self, title, size="400x300"):
+        popup = customtkinter.CTkToplevel(self.window)
+        popup.title(title)
+        popup.geometry(size)
+        popup.transient(self.window)
+        popup.grab_set()
+        popup.focus_force()
+        popup.lift()
+        popup.attributes("-topmost", True)
+        return popup
+
+    def add_book_copies(self):
+        # Create popup window
+        copies_window = self.create_popup("Add Book Copies", "400x300")
+
+        # Book ID field
+        book_id_label = customtkinter.CTkLabel(copies_window, text="Book ID:")
+        book_id_label.pack(pady=(20, 5))
+        book_id_entry = customtkinter.CTkEntry(copies_window, width=250)
+        book_id_entry.pack()
+
+        # Copies field
+        copies_label = customtkinter.CTkLabel(copies_window, text="Number of Copies:")
+        copies_label.pack(pady=(20, 5))
+        copies_entry = customtkinter.CTkEntry(copies_window, width=250)
+        copies_entry.pack()
+
+        # Save function
+        def save_copies():
+            book_id = book_id_entry.get().strip()
+            no_of_copies = copies_entry.get().strip()
+
+            if not book_id.isdigit():
+                messagebox.showerror("Input Error", "Book ID must be numeric.")
+                return
+            if not no_of_copies.isdigit():
+                messagebox.showerror("Input Error", "Number of copies must be numeric.")
+                return
+
+            try:
+                # Call your backend function
+                add_book_copies(book_id, no_of_copies)
+                messagebox.showinfo("Success", f"Book ID {book_id} updated with {no_of_copies} copies!")
+                copies_window.destroy()
+            except Exception as e:
+                messagebox.showerror("Database Error", f"Failed to update copies:\n{e}")
+
+        # Save button
+        save_button = customtkinter.CTkButton(copies_window, text="Update Copies", command=save_copies)
+        save_button.pack(pady=30)
 
 
 
@@ -476,3 +528,4 @@ class LibraryGUI:
 
 
 LibraryGUI()
+
